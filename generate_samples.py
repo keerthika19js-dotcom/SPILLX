@@ -119,7 +119,7 @@ img2_bytes = detector.generate_synthetic_sar_image(512, 512, slick_type="diffuse
 with open("sample_data/sar_images/singapore_strait_sentinel1.png", "wb") as f:
     f.write(img2_bytes)
 
-img3_bytes = detector.generate_synthetic_sar_image(512, 512, slick_type="trailing_bilge_slick")
+img3_bytes = detector.generate_synthetic_sar_image(512, 512, slick_type="english_channel_slick")
 with open("sample_data/sar_images/english_channel_sentinel1.png", "wb") as f:
     f.write(img3_bytes)
 

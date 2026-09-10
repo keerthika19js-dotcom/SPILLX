@@ -223,6 +223,9 @@ class SARSpillDetector:
                 py = cy + int(55 * (t**2) - 35 * t)
                 r = int(14 + 10 * (t + 1.4))
                 cv2.circle(slick_mask, (px, py), r, 255, -1)
+        elif slick_type == "english_channel_slick":
+            cv2.ellipse(slick_mask, (int(width * 0.38), int(height * 0.56)), (135, 34), -18, 0, 360, 255, -1)
+            cv2.ellipse(slick_mask, (int(width * 0.66), int(height * 0.38)), (62, 24), 28, 0, 360, 255, -1)
         else:
             cv2.ellipse(slick_mask, (int(width * 0.5), int(height * 0.5)), (110, 50), 35, 0, 360, 255, -1)
 
