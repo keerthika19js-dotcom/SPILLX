@@ -10,6 +10,7 @@ import MethodologyView from './components/MethodologyView';
 import JudgeBriefModal from './components/JudgeBriefModal';
 import MissionOverview from './components/MissionOverview';
 import EvidenceCenter from './components/EvidenceCenter';
+import DarkVesselCenter from './components/DarkVesselCenter';
 import { demoScenarios, demoScenarioData, demoScenarioDataById } from './demoData';
 import { Layers, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -47,6 +48,7 @@ export default function App() {
   // Report Modal
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
   const [isJudgeBriefOpen, setIsJudgeBriefOpen] = useState(false);
+  const [isDarkVesselCenterOpen, setIsDarkVesselCenterOpen] = useState(false);
 
   // Dark Vessel Simulation Toggle
   const [isSimulatingDark, setIsSimulatingDark] = useState(false);
@@ -317,6 +319,8 @@ export default function App() {
     const nextSim = !isSimulatingDark;
     setIsSimulatingDark(nextSim);
 
+    if (isDemoMode) return;
+
     // Call upload-ais with simulate_dark_mmsi = 368123456 (Ocean Titan)
     try {
       setLoading(true);
@@ -375,6 +379,7 @@ export default function App() {
         onPageChange={handlePageChange}
         onOpenReport={() => setIsReportModalOpen(true)}
         onOpenBrief={() => setIsJudgeBriefOpen(true)}
+        onOpenDarkVessel={() => setIsDarkVesselCenterOpen(true)}
         loading={loading}
         onScenarioStep={changeScenarioBy}
         scenarioPosition={scenarios.length ? `${scenarios.findIndex(scenario => scenario.id === currentScenario) + 1} / ${scenarios.length}` : ''}
@@ -550,6 +555,14 @@ export default function App() {
         drift={drift}
         suspects={vessels}
         onExportEvidence={handleExportEvidence}
+      />
+
+      <DarkVesselCenter
+        isOpen={isDarkVesselCenterOpen}
+        onClose={() => setIsDarkVesselCenterOpen(false)}
+        suspects={vessels}
+        onSimulate={handleSimulateDarkVessel}
+        isSimulating={isSimulatingDark}
       />
 
       {isPresentationMode && (

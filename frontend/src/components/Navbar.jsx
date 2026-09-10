@@ -14,6 +14,7 @@ export default function Navbar({
   onPageChange,
   onOpenReport,
   onOpenBrief,
+  onOpenDarkVessel,
   loading,
   onScenarioStep,
   scenarioPosition
@@ -157,6 +158,15 @@ export default function Navbar({
         >
           <Maximize2 className="w-3.5 h-3.5" />
           <span>{isPresentationMode ? 'Exit Focus' : 'Focus Mode'}</span>
+        </button>
+
+        <button
+          onClick={onOpenDarkVessel}
+          className="hidden xl:flex items-center space-x-1.5 bg-command-800 hover:bg-command-700 text-red-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-command-700 transition-all active:scale-95"
+          title="Open dark vessel detection center"
+        >
+          <ShieldAlert className="w-3.5 h-3.5" />
+          <span>Dark Vessel</span>
         </button>
 
         <button
