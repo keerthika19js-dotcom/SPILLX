@@ -107,6 +107,10 @@ export default function App() {
 
   // 3. SAR Re-detection Handler
   const handleDetectSpill = async ({ file, preset, sensitivity }) => {
+    if (isDemoMode) {
+      return;
+    }
+
     try {
       setLoading(true);
       setErrorMessage('');

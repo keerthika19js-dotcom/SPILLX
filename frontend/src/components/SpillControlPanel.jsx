@@ -14,11 +14,13 @@ export default function SpillControlPanel({
   const [sensitivity, setSensitivity] = useState(0.55);
   const [activeView, setActiveView] = useState('overlay'); // 'overlay' | 'mask'
   const [customFile, setCustomFile] = useState(null);
+  const [localPreviewUrl, setLocalPreviewUrl] = useState('');
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       setCustomFile(file);
+      setLocalPreviewUrl(URL.createObjectURL(file));
       onDetectSpill({ file, sensitivity });
     }
   };
@@ -119,7 +121,9 @@ export default function SpillControlPanel({
 
           <div className="relative w-full h-44 bg-black rounded-lg overflow-hidden border border-command-700 flex items-center justify-center">
             <img
-              src={activeView === 'overlay' ? spill.raw_preview_base64 : spill.mask_base64}
+              src={activeView === 'overlay'
+                ? (localPreviewUrl || spill.raw_preview_base64)
+                : (localPreviewUrl || spill.mask_base64)}
               alt="SAR Radar Detection"
               className="w-full h-full object-cover"
             />
