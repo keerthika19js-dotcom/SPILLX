@@ -319,7 +319,8 @@ export default function App() {
     const nextSim = !isSimulatingDark;
     setIsSimulatingDark(nextSim);
 
-    if (isDemoMode) return;
+    const isStaticPages = window.location.hostname.endsWith('github.io');
+    if (isDemoMode || isStaticPages) return;
 
     // Call upload-ais with simulate_dark_mmsi = 368123456 (Ocean Titan)
     try {
@@ -340,8 +341,13 @@ export default function App() {
         method: 'POST',
         body: formData,
       });
-
-      const tracks = await resAis.json();
+      if (!resAis.ok) {
+        const detail = await resAis.text();
+        throw new Error(`AIS upload failed (${resAis.status}): ${detail}`);
+      }
+      const responseTracks = await resAis.json();
+      const tracks = Array.isArray(responseTracks) ? responseTracks : responseTracks.value;
+      if (!Array.isArray(tracks)) throw new Error('AIS response did not contain vessel tracks');
 
       // Re-correlate
       const resCorr = await fetch('/api/correlate', {
@@ -354,13 +360,17 @@ export default function App() {
           weights: scoringWeights,
         }),
       });
-
+      if (!resCorr.ok) {
+        const detail = await resCorr.text();
+        throw new Error(`AIS correlation failed (${resCorr.status}): ${detail}`);
+      }
       const corrData = await resCorr.json();
       setVessels(corrData.suspects);
       setSelectedVessel(corrData.suspects[0] || null);
     } catch (err) {
       console.error(err);
-      setErrorMessage('AIS simulation or correlation failed.');
+      setIsSimulatingDark(!nextSim);
+      setErrorMessage(err.message || 'AIS simulation or correlation failed.');
     } finally {
       setLoading(false);
     }
