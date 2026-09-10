@@ -318,6 +318,7 @@ export default function App() {
   const handleSimulateDarkVessel = async () => {
     const nextSim = !isSimulatingDark;
     setIsSimulatingDark(nextSim);
+    setErrorMessage('');
 
     const isStaticPages = window.location.hostname.endsWith('github.io');
     if (isDemoMode || isStaticPages) return;
