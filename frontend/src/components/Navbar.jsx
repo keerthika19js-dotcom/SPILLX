@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Radio, Compass, FileText, Layers, 
-  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw 
+  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw, Presentation
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -11,6 +11,7 @@ export default function Navbar({
   activeTab, 
   setActiveTab, 
   onOpenReport,
+  onOpenBrief,
   loading,
   onScenarioStep,
   scenarioPosition
@@ -111,6 +112,14 @@ export default function Navbar({
           <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
           <span>{utcTime || 'UTC 00:00:00'}</span>
         </div>
+
+        <button
+          onClick={onOpenBrief}
+          className="hidden xl:flex items-center space-x-1.5 bg-command-800 hover:bg-command-700 text-cyan-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-command-700 transition-all active:scale-95"
+        >
+          <Presentation className="w-3.5 h-3.5" />
+          <span>Judge Brief</span>
+        </button>
 
         <button
           onClick={onOpenReport}

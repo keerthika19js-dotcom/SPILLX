@@ -7,6 +7,7 @@ import DriftControlPanel from './components/DriftControlPanel';
 import SuspectLeaderboard from './components/SuspectLeaderboard';
 import ReportModal from './components/ReportModal';
 import MethodologyView from './components/MethodologyView';
+import JudgeBriefModal from './components/JudgeBriefModal';
 import { demoScenarios, demoScenarioData, demoScenarioDataById } from './demoData';
 import { Layers, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -42,6 +43,7 @@ export default function App() {
 
   // Report Modal
   const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+  const [isJudgeBriefOpen, setIsJudgeBriefOpen] = useState(false);
 
   // Dark Vessel Simulation Toggle
   const [isSimulatingDark, setIsSimulatingDark] = useState(false);
@@ -258,6 +260,25 @@ export default function App() {
     handleReCorrelate(spill, drift, newWeights);
   };
 
+  const handleExportEvidence = () => {
+    const evidence = {
+      exported_at: new Date().toISOString(),
+      platform: 'SPILLX Maritime Forensics Platform',
+      scenario: currentScenario,
+      spill,
+      drift,
+      suspects: vessels,
+      scoring_weights: scoringWeights,
+    };
+    const blob = new Blob([JSON.stringify(evidence, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SPILLX_Evidence_${currentScenario}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
   // 6. Simulate Dark Vessel Toggle
   const handleSimulateDarkVessel = async () => {
     const nextSim = !isSimulatingDark;
@@ -318,6 +339,7 @@ export default function App() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         onOpenReport={() => setIsReportModalOpen(true)}
+        onOpenBrief={() => setIsJudgeBriefOpen(true)}
         loading={loading}
         onScenarioStep={changeScenarioBy}
         scenarioPosition={scenarios.length ? `${scenarios.findIndex(scenario => scenario.id === currentScenario) + 1} / ${scenarios.length}` : ''}
@@ -460,6 +482,16 @@ export default function App() {
         drift={drift}
         suspects={vessels}
         weights={scoringWeights}
+      />
+
+      <JudgeBriefModal
+        isOpen={isJudgeBriefOpen}
+        onClose={() => setIsJudgeBriefOpen(false)}
+        scenario={scenarios.find(scenario => scenario.id === currentScenario)}
+        spill={spill}
+        drift={drift}
+        suspects={vessels}
+        onExportEvidence={handleExportEvidence}
       />
     </div>
   );
