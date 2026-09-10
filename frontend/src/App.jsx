@@ -50,6 +50,8 @@ export default function App() {
 
   // Dark Vessel Simulation Toggle
   const [isSimulatingDark, setIsSimulatingDark] = useState(false);
+  const [isPresentationMode, setIsPresentationMode] = useState(false);
+  const [isTourPlaying, setIsTourPlaying] = useState(false);
   const workspaceTouchStart = useRef(null);
   const panelTouchStart = useRef(null);
 
@@ -106,6 +108,28 @@ export default function App() {
       }
     }
     init();
+  }, []);
+
+  useEffect(() => {
+    if (!isTourPlaying || scenarios.length < 2) return undefined;
+    const timer = setInterval(() => changeScenarioBy(1), 7000);
+    return () => clearInterval(timer);
+  }, [isTourPlaying, scenarios.length, currentScenario]);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setIsPresentationMode(false);
+        setIsTourPlaying(false);
+      }
+      if (event.key === 'f' && !event.target.matches('input, textarea, select')) setIsPresentationMode(value => !value);
+      if (event.key === ' ' && !event.target.matches('input, textarea, select')) {
+        event.preventDefault();
+        setIsTourPlaying(value => !value);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   const applyScenarioData = (data) => {
@@ -354,6 +378,10 @@ export default function App() {
         loading={loading}
         onScenarioStep={changeScenarioBy}
         scenarioPosition={scenarios.length ? `${scenarios.findIndex(scenario => scenario.id === currentScenario) + 1} / ${scenarios.length}` : ''}
+        isPresentationMode={isPresentationMode}
+        onTogglePresentation={() => setIsPresentationMode(value => !value)}
+        isTourPlaying={isTourPlaying}
+        onToggleTour={() => setIsTourPlaying(value => !value)}
       />
 
       {errorMessage && (
@@ -371,7 +399,7 @@ export default function App() {
 
       {/* Main Investigation Workspace */}
       <div
-        className="flex-1 flex overflow-hidden relative"
+        className={`flex-1 flex overflow-hidden relative ${isPresentationMode ? 'ring-2 ring-cyan-500/60' : ''}`}
         onTouchStart={handleWorkspaceTouchStart}
         onTouchEnd={handleWorkspaceTouchEnd}
       >
@@ -523,6 +551,12 @@ export default function App() {
         suspects={vessels}
         onExportEvidence={handleExportEvidence}
       />
+
+      {isPresentationMode && (
+        <div className="fixed bottom-4 left-1/2 z-50 -translate-x-1/2 rounded-full border border-cyan-700 bg-command-950/95 px-4 py-2 font-mono text-[10px] text-cyan-200 shadow-2xl">
+          FOCUS MODE · Press F or Esc to exit · Space toggles scenario tour {isTourPlaying ? '(playing)' : '(paused)'}
+        </div>
+      )}
     </div>
   );
 }

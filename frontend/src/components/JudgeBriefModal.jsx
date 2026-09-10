@@ -1,11 +1,19 @@
-import React from 'react';
-import { Activity, Download, FileCheck2, ShieldAlert, Target, X } from 'lucide-react';
+import React, { useState } from 'react';
+import { Activity, Clipboard, Download, FileCheck2, Printer, ShieldAlert, Target, X } from 'lucide-react';
 
 export default function JudgeBriefModal({ isOpen, onClose, scenario, spill, drift, suspects, onExportEvidence }) {
+  const [copied, setCopied] = useState(false);
   if (!isOpen) return null;
 
   const topSuspect = suspects?.[0];
   const evidenceCount = (topSuspect?.behavior_notes?.length || 0) + (topSuspect?.has_suspicious_gap ? 1 : 0) + (topSuspect?.has_spoofing_alert ? 1 : 0);
+  const summary = `${scenario?.title || 'SPILLX incident'}: ${topSuspect?.vessel_name || 'No primary suspect'} scored ${topSuspect?.suspicion_score || 0}% suspicion. SAR detected ${spill?.area_km2 || 0} km² with ${spill?.confidence || 0}% confidence. Origin reconstructed ${drift?.drift_hours || 0} hours backward.`;
+
+  const copySummary = async () => {
+    await navigator.clipboard?.writeText(summary);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1800);
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
@@ -75,7 +83,9 @@ export default function JudgeBriefModal({ isOpen, onClose, scenario, spill, drif
           </div>
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-command-800 bg-command-950/90 px-6 py-3">
+        <div className="flex flex-wrap justify-end gap-2 border-t border-command-800 bg-command-950/90 px-6 py-3">
+          <button onClick={() => window.print()} className="flex items-center gap-2 rounded-lg bg-command-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-command-700"><Printer className="h-4 w-4" /> Print brief</button>
+          <button onClick={copySummary} className="flex items-center gap-2 rounded-lg bg-command-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-command-700"><Clipboard className="h-4 w-4" /> {copied ? 'Copied' : 'Copy summary'}</button>
           <button onClick={onClose} className="rounded-lg bg-command-800 px-4 py-2 text-xs font-semibold text-slate-300 hover:bg-command-700">Close</button>
           <button onClick={onExportEvidence} className="flex items-center gap-2 rounded-lg bg-cyan-600 px-4 py-2 text-xs font-bold text-white hover:bg-cyan-500"><Download className="h-4 w-4" /> Export Evidence JSON</button>
         </div>

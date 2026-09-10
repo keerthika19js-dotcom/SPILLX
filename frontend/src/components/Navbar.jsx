@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Radio, Compass, FileText, Layers, 
-  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw, Presentation, LayoutDashboard, SearchCheck
+  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw, Presentation, LayoutDashboard, SearchCheck, Maximize2, Play, Pause
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -17,6 +17,10 @@ export default function Navbar({
   loading,
   onScenarioStep,
   scenarioPosition
+  ,isPresentationMode
+  ,onTogglePresentation
+  ,isTourPlaying
+  ,onToggleTour
 }) {
   const [utcTime, setUtcTime] = useState('');
 
@@ -136,6 +140,24 @@ export default function Navbar({
           <Activity className="w-3 h-3 text-emerald-400 animate-pulse" />
           <span>{utcTime || 'UTC 00:00:00'}</span>
         </div>
+
+        <button
+          onClick={onToggleTour}
+          className="hidden xl:flex items-center space-x-1.5 bg-command-800 hover:bg-command-700 text-amber-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-command-700 transition-all active:scale-95"
+          title="Auto-tour scenarios"
+        >
+          {isTourPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+          <span>Tour</span>
+        </button>
+
+        <button
+          onClick={onTogglePresentation}
+          className="hidden xl:flex items-center space-x-1.5 bg-command-800 hover:bg-command-700 text-cyan-200 text-xs font-bold px-3 py-1.5 rounded-lg border border-command-700 transition-all active:scale-95"
+          title="Toggle focus presentation mode"
+        >
+          <Maximize2 className="w-3.5 h-3.5" />
+          <span>{isPresentationMode ? 'Exit Focus' : 'Focus Mode'}</span>
+        </button>
 
         <button
           onClick={onOpenBrief}
