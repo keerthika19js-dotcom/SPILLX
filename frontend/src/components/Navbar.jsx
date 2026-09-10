@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Radio, Compass, FileText, Layers, 
-  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw, Presentation
+  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw, Presentation, LayoutDashboard, SearchCheck
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -10,6 +10,8 @@ export default function Navbar({
   onSelectScenario, 
   activeTab, 
   setActiveTab, 
+  activePage,
+  onPageChange,
   onOpenReport,
   onOpenBrief,
   loading,
@@ -79,29 +81,51 @@ export default function Navbar({
           {loading && <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />}
         </div>
 
-        {/* View Toggle: Investigation Dashboard vs Methodology */}
+        {/* Four-page presentation navigation */}
         <div className="flex bg-command-950 border border-command-700/80 rounded-lg p-0.5">
           <button
-            onClick={() => setActiveTab('investigation')}
+            onClick={() => onPageChange('overview')}
             className={`flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-              activeTab === 'investigation'
+              activePage === 'overview'
+                ? 'bg-cyan-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-command-800/50'
+            }`}
+          >
+            <LayoutDashboard className="w-3.5 h-3.5" />
+            <span>Overview</span>
+          </button>
+          <button
+            onClick={() => onPageChange('investigation')}
+            className={`flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+              activePage === 'investigation'
                 ? 'bg-cyan-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-command-800/50'
             }`}
           >
             <Layers className="w-3.5 h-3.5" />
-            <span>Investigation Dashboard</span>
+            <span>Investigation</span>
           </button>
           <button
-            onClick={() => setActiveTab('methodology')}
-            className={`flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
-              activeTab === 'methodology'
+            onClick={() => onPageChange('evidence')}
+            className={`hidden lg:flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+              activePage === 'evidence'
+                ? 'bg-cyan-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200 hover:bg-command-800/50'
+            }`}
+          >
+            <SearchCheck className="w-3.5 h-3.5" />
+            <span>Evidence</span>
+          </button>
+          <button
+            onClick={() => onPageChange('methodology')}
+            className={`hidden xl:flex items-center space-x-1.5 px-3 py-1 text-xs font-semibold rounded-md transition-all ${
+              activePage === 'methodology'
                 ? 'bg-cyan-600 text-white shadow-sm'
                 : 'text-slate-400 hover:text-slate-200 hover:bg-command-800/50'
             }`}
           >
             <HelpCircle className="w-3.5 h-3.5" />
-            <span>Methodology & AI Architecture</span>
+            <span>Methodology</span>
           </button>
         </div>
       </div>

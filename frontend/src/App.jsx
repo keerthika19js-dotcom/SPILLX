@@ -8,6 +8,8 @@ import SuspectLeaderboard from './components/SuspectLeaderboard';
 import ReportModal from './components/ReportModal';
 import MethodologyView from './components/MethodologyView';
 import JudgeBriefModal from './components/JudgeBriefModal';
+import MissionOverview from './components/MissionOverview';
+import EvidenceCenter from './components/EvidenceCenter';
 import { demoScenarios, demoScenarioData, demoScenarioDataById } from './demoData';
 import { Layers, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
 
@@ -15,6 +17,7 @@ export default function App() {
   const [scenarios, setScenarios] = useState([]);
   const [currentScenario, setCurrentScenario] = useState('gulf_of_mexico');
   const [activeTab, setActiveTab] = useState('investigation'); // 'investigation' | 'methodology'
+  const [activePage, setActivePage] = useState('investigation');
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -138,6 +141,12 @@ export default function App() {
   const handleSelectScenario = (scenarioId) => {
     setCurrentScenario(scenarioId);
     loadScenarioData(scenarioId);
+  };
+
+  const handlePageChange = (page) => {
+    setActivePage(page);
+    if (page === 'methodology') setActiveTab('methodology');
+    if (page !== 'methodology') setActiveTab('investigation');
   };
 
   // 3. SAR Re-detection Handler
@@ -338,6 +347,8 @@ export default function App() {
         onSelectScenario={handleSelectScenario}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        activePage={activePage}
+        onPageChange={handlePageChange}
         onOpenReport={() => setIsReportModalOpen(true)}
         onOpenBrief={() => setIsJudgeBriefOpen(true)}
         loading={loading}
@@ -364,7 +375,26 @@ export default function App() {
         onTouchStart={handleWorkspaceTouchStart}
         onTouchEnd={handleWorkspaceTouchEnd}
       >
-        {activeTab === 'methodology' ? (
+        {activePage === 'overview' ? (
+          <MissionOverview
+            scenarios={scenarios}
+            currentScenario={currentScenario}
+            onSelectScenario={handleSelectScenario}
+            spill={spill}
+            drift={drift}
+            suspects={vessels}
+            onOpenBrief={() => setIsJudgeBriefOpen(true)}
+            onOpenInvestigation={() => handlePageChange('investigation')}
+          />
+        ) : activePage === 'evidence' ? (
+          <EvidenceCenter
+            spill={spill}
+            drift={drift}
+            suspects={vessels}
+            onExportEvidence={handleExportEvidence}
+            onSelectVessel={(vessel) => { setSelectedVessel(vessel); handlePageChange('investigation'); }}
+          />
+        ) : activePage === 'methodology' ? (
           <MethodologyView />
         ) : (
           <>
@@ -460,7 +490,7 @@ export default function App() {
       </div>
 
       {/* Bottom Chronological Timeline Scrubber (visible on investigation tab) */}
-      {activeTab === 'investigation' && (
+      {activePage === 'investigation' && (
         <TimelinePlayer
           startTime={startTime}
           endTime={endTime}
