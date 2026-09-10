@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
 import TacticalMap from './components/TacticalMap';
 import TimelinePlayer from './components/TimelinePlayer';
@@ -45,6 +45,39 @@ export default function App() {
 
   // Dark Vessel Simulation Toggle
   const [isSimulatingDark, setIsSimulatingDark] = useState(false);
+  const workspaceTouchStart = useRef(null);
+  const panelTouchStart = useRef(null);
+
+  const changeScenarioBy = (step) => {
+    if (!scenarios.length) return;
+    const currentIndex = scenarios.findIndex(scenario => scenario.id === currentScenario);
+    const nextIndex = (currentIndex + step + scenarios.length) % scenarios.length;
+    handleSelectScenario(scenarios[nextIndex].id);
+  };
+
+  const handleWorkspaceTouchStart = (event) => {
+    workspaceTouchStart.current = event.touches[0].clientX;
+  };
+
+  const handleWorkspaceTouchEnd = (event) => {
+    if (workspaceTouchStart.current === null) return;
+    const distance = event.changedTouches[0].clientX - workspaceTouchStart.current;
+    workspaceTouchStart.current = null;
+    if (Math.abs(distance) < 60 || event.target.closest('button, input, select, textarea')) return;
+    changeScenarioBy(distance < 0 ? 1 : -1);
+  };
+
+  const handlePanelTouchStart = (event) => {
+    panelTouchStart.current = event.touches[0].clientX;
+  };
+
+  const handlePanelTouchEnd = (event) => {
+    if (panelTouchStart.current === null) return;
+    const distance = event.changedTouches[0].clientX - panelTouchStart.current;
+    panelTouchStart.current = null;
+    if (Math.abs(distance) < 60 || event.target.closest('button, input, select, textarea')) return;
+    setLeftTab(distance < 0 ? 'drift' : 'sar');
+  };
 
   // 1. Initial Load: Fetch Scenarios and Load Default
   useEffect(() => {
@@ -286,6 +319,8 @@ export default function App() {
         setActiveTab={setActiveTab}
         onOpenReport={() => setIsReportModalOpen(true)}
         loading={loading}
+        onScenarioStep={changeScenarioBy}
+        scenarioPosition={scenarios.length ? `${scenarios.findIndex(scenario => scenario.id === currentScenario) + 1} / ${scenarios.length}` : ''}
       />
 
       {errorMessage && (
@@ -302,15 +337,23 @@ export default function App() {
       )}
 
       {/* Main Investigation Workspace */}
-      <div className="flex-1 flex overflow-hidden relative">
+      <div
+        className="flex-1 flex overflow-hidden relative"
+        onTouchStart={handleWorkspaceTouchStart}
+        onTouchEnd={handleWorkspaceTouchEnd}
+      >
         {activeTab === 'methodology' ? (
           <MethodologyView />
         ) : (
           <>
             {/* Left Control Panel: SAR & Drift Tabs */}
-            <div className={`relative flex flex-col transition-all duration-300 z-10 shrink-0 border-r border-command-700/60 bg-command-950 ${
+            <div
+              onTouchStart={handlePanelTouchStart}
+              onTouchEnd={handlePanelTouchEnd}
+              className={`relative flex flex-col transition-all duration-300 z-10 shrink-0 border-r border-command-700/60 bg-command-950 ${
               isLeftCollapsed ? 'w-0 overflow-hidden border-none' : 'w-80 md:w-96'
-            }`}>
+            }`}
+            >
               {/* Tab Switcher */}
               <div className="flex border-b border-command-800 bg-command-900/60 shrink-0">
                 <button

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   ShieldAlert, Radio, Compass, FileText, Layers, 
-  HelpCircle, Activity, ChevronDown, RefreshCw 
+  HelpCircle, Activity, ChevronLeft, ChevronRight, RefreshCw 
 } from 'lucide-react';
 
 export default function Navbar({ 
@@ -11,7 +11,9 @@ export default function Navbar({
   activeTab, 
   setActiveTab, 
   onOpenReport,
-  loading 
+  loading,
+  onScenarioStep,
+  scenarioPosition
 }) {
   const [utcTime, setUtcTime] = useState('');
 
@@ -53,6 +55,9 @@ export default function Navbar({
         {/* Scenario Quick Selector */}
         <div className="flex items-center space-x-2 bg-command-950/70 border border-command-700/80 rounded-lg px-2.5 py-1">
           <Compass className="w-3.5 h-3.5 text-cyan-400" />
+          <button onClick={() => onScenarioStep(-1)} disabled={loading} className="text-slate-400 hover:text-cyan-300 disabled:opacity-40" title="Previous scenario" aria-label="Previous scenario">
+            <ChevronLeft className="w-3.5 h-3.5" />
+          </button>
           <span className="text-xs text-slate-400 font-medium">Scenario:</span>
           <select 
             value={currentScenario}
@@ -66,6 +71,10 @@ export default function Navbar({
               </option>
             ))}
           </select>
+          <button onClick={() => onScenarioStep(1)} disabled={loading} className="text-slate-400 hover:text-cyan-300 disabled:opacity-40" title="Next scenario" aria-label="Next scenario">
+            <ChevronRight className="w-3.5 h-3.5" />
+          </button>
+          <span className="hidden sm:inline text-[10px] font-mono text-slate-500">{scenarioPosition}</span>
           {loading && <RefreshCw className="w-3.5 h-3.5 text-cyan-400 animate-spin" />}
         </div>
 
