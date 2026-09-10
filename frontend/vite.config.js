@@ -3,8 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-
-  base: '/SPILLX/',
+  base: process.env.GITHUB_ACTIONS === 'true' ? '/SPILLX/' : '/',
 
   server: {
     port: 5173,

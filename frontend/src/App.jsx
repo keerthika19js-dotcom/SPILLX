@@ -7,6 +7,7 @@ import DriftControlPanel from './components/DriftControlPanel';
 import SuspectLeaderboard from './components/SuspectLeaderboard';
 import ReportModal from './components/ReportModal';
 import MethodologyView from './components/MethodologyView';
+import { demoScenarios, demoScenarioData } from './demoData';
 import { Layers, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function App() {
@@ -15,6 +16,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('investigation'); // 'investigation' | 'methodology'
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState('');
+  const [isDemoMode, setIsDemoMode] = useState(false);
 
   // Core Data
   const [spill, setSpill] = useState(null);
@@ -50,6 +52,7 @@ export default function App() {
       try {
         setLoading(true);
         const resScenarios = await fetch('/api/scenarios');
+        if (!resScenarios.ok) throw new Error('API unavailable');
         const scenariosData = await resScenarios.json();
         setScenarios(scenariosData);
 
@@ -57,12 +60,26 @@ export default function App() {
         await loadScenarioData('gulf_of_mexico');
       } catch (err) {
         console.error('Failed to initialize app:', err);
+        setIsDemoMode(true);
+        setScenarios(demoScenarios);
+        applyScenarioData(demoScenarioData);
       } finally {
         setLoading(false);
       }
     }
     init();
   }, []);
+
+  const applyScenarioData = (data) => {
+    setSpill(data.spill);
+    setDrift(data.drift);
+    setVessels(data.correlation.suspects);
+    setSelectedVessel(data.correlation.suspects[0] || null);
+    setScoringWeights(data.scoring_weights);
+    setStartTime(data.drift.estimated_release_start);
+    setEndTime(data.spill.timestamp);
+    setCurrentTime(data.drift.release_window_midpoint);
+  };
 
   // 2. Load Full Scenario Package
   const loadScenarioData = async (scenarioId) => {
@@ -73,21 +90,11 @@ export default function App() {
       if (!res.ok) throw new Error('Scenario fetch failed');
       const data = await res.json();
 
-      setSpill(data.spill);
-      setDrift(data.drift);
-      setVessels(data.correlation.suspects);
-      setSelectedVessel(data.correlation.suspects[0] || null);
-      setScoringWeights(data.scoring_weights);
-
-      // Set Timeline bounds based on vessel points and spill time
-      if (data.drift && data.spill) {
-        setStartTime(data.drift.estimated_release_start);
-        setEndTime(data.spill.timestamp);
-        setCurrentTime(data.drift.release_window_midpoint);
-      }
+      applyScenarioData(data);
     } catch (err) {
       console.error('Error loading scenario:', err);
-      setErrorMessage('Unable to load the selected scenario. Check that the backend is running.');
+      setIsDemoMode(true);
+      applyScenarioData(demoScenarioData);
     } finally {
       setLoading(false);
     }
@@ -281,6 +288,12 @@ export default function App() {
         <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3 rounded-lg border border-red-700 bg-red-950/95 px-4 py-2 text-xs text-red-100 shadow-xl">
           <span>{errorMessage}</span>
           <button onClick={() => setErrorMessage('')} className="font-bold text-red-300 hover:text-white" aria-label="Dismiss error">X</button>
+        </div>
+      )}
+
+      {isDemoMode && !errorMessage && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-40 rounded-lg border border-amber-700 bg-amber-950/95 px-4 py-2 text-xs text-amber-100 shadow-xl">
+          GitHub Pages demo mode: live API actions require the localhost backend.
         </div>
       )}
 
