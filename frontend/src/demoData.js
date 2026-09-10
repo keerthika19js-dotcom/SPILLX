@@ -7,6 +7,8 @@ const gulfSpill = {
   perimeter_km: 288.78,
   confidence: 74.1,
   sensor: 'Sentinel-1 SAR (C-band VV)',
+  raw_preview_base64: 'https://raw.githubusercontent.com/keerthika19js-dotcom/SPILLX/main/sample_data/sar_images/gulf_of_mexico_sentinel1.png',
+  mask_base64: 'https://raw.githubusercontent.com/keerthika19js-dotcom/SPILLX/main/sample_data/sar_images/gulf_of_mexico_sentinel1.png',
 };
 
 const gulfDrift = {
