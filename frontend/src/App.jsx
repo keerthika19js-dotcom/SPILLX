@@ -7,7 +7,7 @@ import DriftControlPanel from './components/DriftControlPanel';
 import SuspectLeaderboard from './components/SuspectLeaderboard';
 import ReportModal from './components/ReportModal';
 import MethodologyView from './components/MethodologyView';
-import { demoScenarios, demoScenarioData } from './demoData';
+import { demoScenarios, demoScenarioData, demoScenarioDataById } from './demoData';
 import { Layers, Sliders, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function App() {
@@ -62,7 +62,7 @@ export default function App() {
         console.error('Failed to initialize app:', err);
         setIsDemoMode(true);
         setScenarios(demoScenarios);
-        applyScenarioData(demoScenarioData);
+        applyScenarioData(demoScenarioDataById.gulf_of_mexico);
       } finally {
         setLoading(false);
       }
@@ -94,7 +94,7 @@ export default function App() {
     } catch (err) {
       console.error('Error loading scenario:', err);
       setIsDemoMode(true);
-      applyScenarioData(demoScenarioData);
+      applyScenarioData(demoScenarioDataById[scenarioId] || demoScenarioData);
     } finally {
       setLoading(false);
     }

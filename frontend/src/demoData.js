@@ -1,4 +1,4 @@
-const demoSarImage = `${import.meta.env.BASE_URL}gulf_of_mexico_sentinel1.png`;
+const demoSarImage = (name) => `${import.meta.env.BASE_URL}${name}_sentinel1.png`;
 
 const gulfSpill = {
   spill_id: 'SPILL-SAR-DEMO',
@@ -9,8 +9,8 @@ const gulfSpill = {
   perimeter_km: 288.78,
   confidence: 74.1,
   sensor: 'Sentinel-1 SAR (C-band VV)',
-  raw_preview_base64: demoSarImage,
-  mask_base64: demoSarImage,
+  raw_preview_base64: demoSarImage('gulf_of_mexico'),
+  mask_base64: demoSarImage('gulf_of_mexico'),
 };
 
 const gulfDrift = {
@@ -60,4 +60,85 @@ export const demoScenarioData = {
   drift: gulfDrift,
   correlation: { suspects: demoVessels },
   scoring_weights: { proximity: 0.35, temporal: 0.25, gap: 0.20, anomaly: 0.20 },
+};
+
+const shiftPoint = (point, latOffset, lonOffset) => ({
+  ...point,
+  lat: point.lat + latOffset,
+  lon: point.lon + lonOffset,
+});
+
+const shiftPolygon = (polygon, latOffset, lonOffset) => polygon.map(([lat, lon]) => [lat + latOffset, lon + lonOffset]);
+
+const createScenarioData = ({
+  id,
+  imageName,
+  centroid,
+  origin,
+  timestamp,
+  releaseStart,
+  releaseEnd,
+  midpoint,
+  area,
+  confidence,
+  vector,
+  bearing,
+  duration,
+  scores,
+  names,
+}) => {
+  const latOffset = centroid.lat - gulfSpill.centroid.lat;
+  const lonOffset = centroid.lon - gulfSpill.centroid.lon;
+  const spill = {
+    ...gulfSpill,
+    spill_id: `SPILL-SAR-${id.toUpperCase()}`,
+    timestamp,
+    centroid,
+    polygon: shiftPolygon(gulfSpill.polygon, latOffset, lonOffset),
+    area_km2: area,
+    confidence,
+    raw_preview_base64: demoSarImage(imageName),
+    mask_base64: demoSarImage(imageName),
+  };
+  const drift = {
+    ...gulfDrift,
+    origin_centroid: origin,
+    probable_origin_zone: shiftPolygon(gulfDrift.probable_origin_zone, latOffset, lonOffset),
+    estimated_release_start: releaseStart,
+    estimated_release_end: releaseEnd,
+    release_window_midpoint: midpoint,
+    net_drift_vector_knots: vector,
+    net_drift_bearing_deg: bearing,
+    drift_hours: duration,
+    trajectory: gulfDrift.trajectory.map(point => shiftPoint(point, latOffset, lonOffset)),
+  };
+  const suspects = demoVessels.map((candidate, index) => ({
+    ...candidate,
+    vessel_name: names[index],
+    suspicion_score: scores[index],
+    rank: index + 1,
+    track_points: candidate.track_points.map(point => shiftPoint(point, latOffset, lonOffset)),
+    closest_approach_time: midpoint,
+  }));
+  return {
+    scenario_id: id,
+    spill,
+    drift,
+    correlation: { suspects },
+    scoring_weights: { proximity: 0.35, temporal: 0.25, gap: 0.20, anomaly: 0.20 },
+  };
+};
+
+export const demoScenarioDataById = {
+  gulf_of_mexico: demoScenarioData,
+  singapore_strait: createScenarioData({
+    id: 'singapore_strait', imageName: 'singapore_strait', centroid: { lat: 1.30, lon: 103.90 }, origin: { lat: 1.22, lon: 103.78 },
+    timestamp: '2026-09-10T06:30:00Z', releaseStart: '2026-09-10T00:00:00Z', releaseEnd: '2026-09-10T03:15:00Z', midpoint: '2026-09-10T01:37:00Z',
+    area: 268.4, confidence: 81.6, vector: 1.42, bearing: 74.5, duration: 6.5, scores: [91.8, 64.7, 51.3], names: ['OCEAN TITAN', 'STRAIT VOYAGER', 'PACIFIC TRADER'],
+  }),
+  english_channel: createScenarioData({
+    id: 'english_channel', imageName: 'english_channel', centroid: { lat: 51.05, lon: 1.45 }, origin: { lat: 50.96, lon: 1.30 },
+    timestamp: '2026-09-10T05:00:00Z', releaseStart: '2026-09-09T21:00:00Z', releaseEnd: '2026-09-10T02:00:00Z', midpoint: '2026-09-09T23:30:00Z',
+    area: 312.7, confidence: 78.9, vector: 1.67, bearing: 52.2, duration: 7, scores: [88.6, 72.4, 48.9], names: ['SEA PHANTOM', 'DOVER CARRIER', 'CHANNEL STAR'],
+  }),
 };

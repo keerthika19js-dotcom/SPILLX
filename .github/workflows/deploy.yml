@@ -33,7 +33,7 @@ jobs:
         run: npm ci
 
       - name: Add demo SAR image
-        run: mkdir -p frontend/public && cp sample_data/sar_images/gulf_of_mexico_sentinel1.png frontend/public/gulf_of_mexico_sentinel1.png
+        run: mkdir -p frontend/public && cp sample_data/sar_images/*_sentinel1.png frontend/public/
 
       - name: Build frontend
         working-directory: frontend
